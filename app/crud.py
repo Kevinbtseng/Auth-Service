@@ -15,3 +15,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user_by_email(db: Session, email: str):
     stmt = select(models.User).where(models.User.email == email)
     return db.scalars(stmt).one_or_none()
+
+def get_user_by_id(db: Session, id: int):
+    stmt = select(models.User).where(models.User.id == id)
+    return db.scalars(stmt).one_or_none()

@@ -1,6 +1,7 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import jwt
+from jwt import PyJWTError
 from datetime import datetime, timedelta, timezone
 from app import config
 
@@ -35,3 +36,9 @@ def create_access_token(data: dict, expires_delta: timedelta=None):
         algorithm="HS256"
     )
     return encoded_jwt
+
+def decode_access_token(token: str):
+    try:
+        return jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
+    except PyJWTError:
+        return None

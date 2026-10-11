@@ -8,10 +8,10 @@ bearer_scheme = HTTPBearer()
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: Session = Depends(database.get_db)):
     payload = security.decode_access_token(credentials.credentials)
     if payload is None:
-        raise HTTPException(401, "Invalid or expired token")
+        raise HTTPException(401, "Invalid or expired access token")
     
     user = crud.get_user_by_id(db, int(payload["sub"]))
     if user:
         return user
     else:
-        raise HTTPException(401, "Invalid or expired token")
+        raise HTTPException(401, "Invalid or expired access token")

@@ -29,3 +29,22 @@ def store_refresh_token(user_id, family_id=None):
     pipe.execute()
 
     return raw_token, family_id
+
+def lookup_token(raw_token):
+    key = f"refresh:{hash_token(raw_token)}"
+    data = r.hgetall(key)
+    
+    return data or None
+
+def revoke_family(family_id):
+    family_key = f"family:{family_id}"
+
+    tokens = r.smembers(family_key)
+
+    for token in tokens:
+        r.delete(f"refresh:{token}")
+    r.delete(family_key)
+
+def mark_used(raw_token):
+    key = f"refresh:{hash_token(raw_token)}"
+    r.hset(key, "used", "1")

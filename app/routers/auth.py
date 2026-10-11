@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app import schemas, database, crud, security, models, dependencies
+from app import schemas, database, crud, security, models, dependencies, refresh_tokens
 
 router = APIRouter(
     prefix="/auth",
@@ -20,8 +20,9 @@ async def user_login(user: schemas.UserLogin, db: Session = Depends(database.get
     if userFromEmail is None:
         raise HTTPException(status_code=401, detail="Invalid login details")
     elif security.verify_password(user.password, userFromEmail.hashed_password):
-        token = security.create_access_token({"sub": str(userFromEmail.id)})
-        return {"access_token": token, "token_type": "bearer"}
+        access_token = security.create_access_token({"sub": str(userFromEmail.id)})
+        refresh_token, _ = refresh_tokens.store_refresh_token(userFromEmail.id)
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=401, detail="Invalid login details")
 

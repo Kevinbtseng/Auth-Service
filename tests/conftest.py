@@ -38,3 +38,9 @@ def registered_user():
 @pytest.fixture
 def client():
     return TestClient(app)
+
+@pytest.fixture
+def login_tokens(client, registered_user):
+    resp = client.post("/auth/login", json=registered_user)
+    assert resp.status_code == 200
+    return resp.json()

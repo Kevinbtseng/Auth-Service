@@ -10,7 +10,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
     if payload is None:
         raise HTTPException(401, "Invalid or expired access token")
     
-    user = crud.get_user_by_id(db, int(payload["sub"]))
+    try:
+        user_id = int(payload["sub"])
+    except (ValueError, TypeError):
+        raise HTTPException(401, "Invalid or expired access token")
+
+    user = crud.get_user_by_id(db, user_id)
     if user:
         return user
     else:

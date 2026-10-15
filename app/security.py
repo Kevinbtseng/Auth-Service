@@ -1,4 +1,4 @@
-from argon2 import PasswordHasher
+﻿from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import jwt
 from jwt import PyJWTError
@@ -39,6 +39,9 @@ def create_access_token(data: dict, expires_delta: timedelta=None):
 
 def decode_access_token(token: str):
     try:
-        return jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
+        return jwt.decode(token, 
+                          config.JWT_SECRET, 
+                          algorithms=["HS256"],
+                          options={"require": ["exp", "sub"]})
     except PyJWTError:
         return None

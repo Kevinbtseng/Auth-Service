@@ -1,4 +1,5 @@
 from app.security import hash_password, verify_password, create_access_token, decode_access_token
+from app import config
 from datetime import timedelta, datetime, timezone
 import secrets
 import jwt
@@ -52,3 +53,14 @@ def test_wrong_jwt_secret():
     )
 
     assert decode_access_token(wrong_token) is None
+
+def test_token_without_exp_rejected():
+    token = jwt.encode({"sub": "123"}, config.JWT_SECRET, algorithm="HS256")
+
+    assert decode_access_token(token) is None
+
+def test_token_without_sub_rejected():
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    token = jwt.encode({"exp": expire}, config.JWT_SECRET, algorithm="HS256")
+
+    assert decode_access_token(token) is None

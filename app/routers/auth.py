@@ -55,3 +55,9 @@ async def refresh_token(body: schemas.RefreshRequest, db: Session = Depends(data
         new_token, _ = refresh_tokens.store_refresh_token(data["user_id"], data["family_id"])
         access_token = security.create_access_token({"sub": data["user_id"]})
         return {"access_token": access_token, "refresh_token": new_token, "token_type": "bearer"}
+
+@router.post("/logout", status_code=204)
+async def logout(body: schemas.RefreshRequest):
+    data = refresh_tokens.lookup_token(body.refresh_token)
+    if data is not None:
+        refresh_tokens.revoke_family(data["family_id"])

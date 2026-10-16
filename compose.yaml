@@ -12,5 +12,16 @@ services:
         image: redis:alpine
         ports:
             - "6379:6379"
+    api:
+        build: .
+        ports:
+            - "8000:8000"
+        environment:
+            - DATABASE_URL=postgresql://postgres:postgres@db:5432/auth
+            - REDIS_URL=redis://redis:6379/0
+            - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+        depends_on:
+            - db
+            - redis
 volumes:
     postgres_data:

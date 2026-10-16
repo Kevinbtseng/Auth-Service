@@ -51,7 +51,9 @@ async def refresh_token(body: schemas.RefreshRequest, db: Session = Depends(data
         user = crud.get_user_by_id(db, int(data["user_id"]))
         if user is None:
             raise HTTPException(401, "Invalid or expired refresh token")
-        refresh_tokens.mark_used(raw_token)
+        if not refresh_tokens.claim_token(raw_token):
+            refresh_tokens.revoke_family(data["family_id"])
+            raise HTTPException(401, "Invalid or expired refresh token")
         new_token, _ = refresh_tokens.store_refresh_token(data["user_id"], data["family_id"])
         access_token = security.create_access_token({"sub": data["user_id"]})
         return {"access_token": access_token, "refresh_token": new_token, "token_type": "bearer"}

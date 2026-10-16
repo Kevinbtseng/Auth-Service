@@ -5,6 +5,15 @@ import uuid
 
 REFRESH_TOKEN_TTL = 7 * 24 * 3600
 
+CLAIM_SCRIPT = """
+if redis.call("hget", KEYS[1], "used") == "0" then
+    redis.call("hset", KEYS[1], "used", "1")
+    return 1
+end
+return 0
+"""
+_claim = r.register_script(CLAIM_SCRIPT)
+
 def generate_token():
     return secrets.token_urlsafe(32)
 
@@ -45,6 +54,6 @@ def revoke_family(family_id):
         r.delete(f"refresh:{token}")
     r.delete(family_key)
 
-def mark_used(raw_token):
+def claim_token(raw_token):
     key = f"refresh:{hash_token(raw_token)}"
-    r.hset(key, "used", "1")
+    return _claim(keys=[key]) == 1
